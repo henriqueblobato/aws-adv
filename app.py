@@ -7,25 +7,28 @@ from time import time
 from flask import Flask, flash, request, redirect, jsonify
 from comprehend_clasifier import ComprehendDetect, LanguageEnum
 
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-MAX_THREADS = 10
-
 logger = logging.getLogger(__name__)
+
+ALLOWED_EXTENSIONS = {'txt', }
+
 app = Flask(__name__)
+
 comprehend_classifier = ComprehendDetect()
+
+MAX_THREADS = 10
 
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def detect(file_content):
+def detect(filename: str, file_content: str) -> dict:
     languages = comprehend_classifier.detect_languages(file_content)
     lang_code = languages[0]['LanguageCode']
 
     functions = [
         comprehend_classifier.detect_entities,
-        comprehend_classifier.detect_key_phrases,
+        # comprehend_classifier.detect_key_phrases,
         comprehend_classifier.detect_sentiment,
         comprehend_classifier.detect_syntax,
         comprehend_classifier.detect_pii,
@@ -40,16 +43,12 @@ def detect(file_content):
         )
         thread.start()
         thread.join()
-    return results
+    return {filename: results}
 
 
 @app.route('/', methods=['GET', 'POST'])
-def main():
+def upload_file():
     return redirect('/data')
-
-
-def async_detect(file_text: str) -> list:
-    return detect(file_text)
 
 
 def thread_pools_task(file_list: list) -> list:
@@ -61,13 +60,12 @@ def thread_pools_task(file_list: list) -> list:
         futures = []
         for f in file_list:
             file_content = f.read().decode('utf-8')
-            result = executor.submit(async_detect, file_content)
+            result = executor.submit(detect, f.filename, file_content)
             futures.append(result)
         for future in concurrent.futures.as_completed(futures):
-            results = [i for i in future.result()]
-
+            results.append(future.result())
     logger.info(f'Threads finished with {len(results)} results')
-    return results
+    return [results]
 
 
 @app.route("/data", methods=['GET', 'POST'])
@@ -84,8 +82,8 @@ async def get_data():
         return jsonify(results)
 
     return '''
-    <!doctype html>
-        <h5>Upload Multiple Files</h5>
+        <!doctype html>
+        <h4>Upload Multiple Files</h4>
           <form action = "/data" method = "POST" 
              enctype = "multipart/form-data">
              <input type = "file" name = "file" multiple/>
@@ -97,3 +95,7 @@ async def get_data():
         </html>
         '''
 
+if __name__ == '__main__':
+    app.env = 'development'
+    app.secret_key = 'badasses123'
+    app.run(debug=True, port=5001, threaded=True)
