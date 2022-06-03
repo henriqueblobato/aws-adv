@@ -28,6 +28,7 @@ def detect(file_content):
         comprehend_classifier.detect_key_phrases,
         comprehend_classifier.detect_sentiment,
         comprehend_classifier.detect_syntax,
+        comprehend_classifier.detect_pii,
     ]
     demo_size = 5
     results = []
