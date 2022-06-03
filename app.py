@@ -1,20 +1,18 @@
 import concurrent.futures
 import logging
+import os
 from threading import Thread
 from time import time
 
 from flask import Flask, flash, request, redirect, jsonify
 from comprehend_clasifier import ComprehendDetect, LanguageEnum
 
-logger = logging.getLogger(__name__)
-
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
-app = Flask(__name__)
-
-comprehend_classifier = ComprehendDetect()
-
 MAX_THREADS = 10
+
+logger = logging.getLogger(__name__)
+app = Flask(__name__)
+comprehend_classifier = ComprehendDetect()
 
 
 def allowed_file(filename):
@@ -45,33 +43,8 @@ def detect(file_content):
 
 
 @app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-
-        file = request.files['file']
-        file_content = file.read().decode('utf-8')
-
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-
-            results = detect(file_content)
-
-            return jsonify(results)
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+def main():
+    return redirect('/data')
 
 
 def async_detect(file_text: str) -> list:
@@ -119,14 +92,11 @@ async def get_data():
         </form>
         
         <h4>Upload Multiple Files</h4>
-          <form action = "http://localhost:5001/data" method = "POST" 
+          <form action = "/data" method = "POST" 
              enctype = "multipart/form-data">
              <input type = "file" name = "file" multiple/>
              <input type = "submit"/>
           </form>
+        </html>
         '''
 
-if __name__ == '__main__':
-    app.env = 'development'
-    app.secret_key = 'badasses123'
-    app.run(debug=True, port=5001, threaded=True)
