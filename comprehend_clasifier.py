@@ -1,4 +1,5 @@
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from pprint import pprint
@@ -6,7 +7,6 @@ from threading import Thread
 
 import boto3
 from botocore.exceptions import ClientError
-
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,12 @@ class ComprehendDetect:
         """
         :param comprehend_client: A Boto3 Comprehend client.
         """
-        self.comprehend_client = boto3.client('comprehend')
+        self.comprehend_client = boto3.client(
+            'comprehend',
+            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            region_name=os.getenv('AWS_REGION')
+        )
 
     def detect_languages(self, text):
         """
@@ -254,7 +259,6 @@ class ComprehendDetect:
 
 
 def usage_demo():
-
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
     comp_detect = ComprehendDetect()
