@@ -78,7 +78,7 @@ async def get_data():
         file_list = request.files.getlist("file")
         init_time = time()
         results = thread_pools_task(file_list)
-        results.append({'total_time': round(time() - init_time, 4)})
+        results.append({'execution_time': round(time() - init_time, 4)})
         return jsonify(results)
 
     return '''
