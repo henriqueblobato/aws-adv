@@ -83,20 +83,16 @@ async def get_data():
         return jsonify(results)
 
     return '''
-        <!doctype html>
-        <title>Upload new File</title>
-        <h4>Upload Single File</h4>
-        <form method=post enctype=multipart/form-data>
-          <input type=file name=file>
-          <input type=submit value=Upload>
-        </form>
-        
-        <h4>Upload Multiple Files</h4>
+    <!doctype html>
+        <h5>Upload Multiple Files</h5>
           <form action = "/data" method = "POST" 
              enctype = "multipart/form-data">
              <input type = "file" name = "file" multiple/>
              <input type = "submit"/>
           </form>
+          <footer
+            style="position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 12px;"> 
+          Incredible frontend designed by a really experienced front end developer 
         </html>
         '''
 
