@@ -71,9 +71,6 @@ class ComprehendDetect:
     """Encapsulates Comprehend detection functions."""
 
     def __init__(self):
-        """
-        :param comprehend_client: A Boto3 Comprehend client.
-        """
         self.comprehend_client = boto3.client('comprehend')
 
     def detect_languages(self, text):
