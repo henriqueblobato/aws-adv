@@ -293,5 +293,5 @@ def usage_demo():
     pprint(results)
 
 
-if __name__ == '__main__':
-    usage_demo()
+# if __name__ == '__main__':
+#     usage_demo()
